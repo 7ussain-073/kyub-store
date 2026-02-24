@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 // Email service configuration
 const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || "resend";
+const STORE_ALERT_EMAIL = process.env.STORE_ALERT_EMAIL; // ✅ NEW
 
 // Fallback currency symbols
 const SYMBOLS: Record<string, string> = {
@@ -11,11 +12,9 @@ const SYMBOLS: Record<string, string> = {
   EUR: "€",
 };
 
-async function sendEmailViaResend(to: string, subject: string, html: string): Promise<void> {
+async function sendEmailViaResend(to: string | string[], subject: string, html: string): Promise<void> {
   const resendApiKey = process.env.RESEND_API_KEY;
-  if (!resendApiKey) {
-    throw new Error("RESEND_API_KEY is not configured");
-  }
+  if (!resendApiKey) throw new Error("RESEND_API_KEY is not configured");
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -37,11 +36,11 @@ async function sendEmailViaResend(to: string, subject: string, html: string): Pr
   }
 }
 
-async function sendEmailViaSendGrid(to: string, subject: string, html: string): Promise<void> {
+async function sendEmailViaSendGrid(to: string | string[], subject: string, html: string): Promise<void> {
   const sendgridApiKey = process.env.SENDGRID_API_KEY;
-  if (!sendgridApiKey) {
-    throw new Error("SENDGRID_API_KEY is not configured");
-  }
+  if (!sendgridApiKey) throw new Error("SENDGRID_API_KEY is not configured");
+
+  const toArr = Array.isArray(to) ? to : [to];
 
   const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
     method: "POST",
@@ -50,8 +49,7 @@ async function sendEmailViaSendGrid(to: string, subject: string, html: string): 
       Authorization: `Bearer ${sendgridApiKey}`,
     },
     body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }], subject }],
-      // ✅ خليها دومينك الصحيح
+      personalizations: [{ to: toArr.map(email => ({ email })), subject }],
       from: { email: "noreply@a2h-store.store", name: "A2H Store" },
       content: [{ type: "text/html", value: html }],
     }),
@@ -63,7 +61,7 @@ async function sendEmailViaSendGrid(to: string, subject: string, html: string): 
   }
 }
 
-async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+async function sendEmail(to: string | string[], subject: string, html: string): Promise<void> {
   if (EMAIL_PROVIDER === "sendgrid") {
     await sendEmailViaSendGrid(to, subject, html);
   } else {
@@ -78,82 +76,38 @@ function generateOrderConfirmationEmail(
   amount: number,
   currencySymbol: string
 ): string {
-  const safeName = String(fullName || "").trim() || "عميلنا العزيز";
-  const safePlan = String(planName || "").trim() || "—";
-  const safeOrder = String(orderId || "").trim() || "—";
-  const safeSymbol = String(currencySymbol || "").trim() || "—";
-
   return `
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>تأكيد الطلب</title>
-    <style>
-      body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; line-height: 1.6; color: #333; }
-      .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
-      .header { text-align: center; padding: 20px 0; border-bottom: 2px solid #d4af37; }
-      .header h1 { color: #d4af37; margin: 0; font-size: 28px; }
-      .content { background-color: white; padding: 30px; margin: 20px 0; border-radius: 8px; }
-      .order-details { background-color: #f5f5f5; padding: 20px; border-radius: 6px; margin: 20px 0; }
-      .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-      .detail-row:last-child { border-bottom: none; }
-      .label { color: #666; font-weight: 500; }
-      .value { color: #333; font-weight: 600; }
-      .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; }
-      .status-pending { background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 4px; margin: 15px 0; border-right: 4px solid #ffc107; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header"><h1>A2H Store</h1></div>
+  <div style="font-family:Arial; direction:rtl;">
+    <h2>A2H Store</h2>
+    <p>مرحباً ${fullName}</p>
+    <p>تم استلام طلبك بنجاح.</p>
+    <p><b>رقم الطلب:</b> ${orderId}</p>
+    <p><b>الخطة:</b> ${planName}</p>
+    <p><b>المبلغ:</b> ${amount.toFixed(2)} ${currencySymbol}</p>
+  </div>
+  `.trim();
+}
 
-      <div class="content">
-        <p>مرحباً ${safeName},</p>
-        <p>شكراً لك على اختيار خدمات A2H Store!</p>
-        <p>لقد استقبلنا طلبك بنجاح. سيتم التحقق من إثبات الدفع الخاص بك وتأكيد اشتراكك قريباً.</p>
-
-        <div class="status-pending">
-          <strong>⏳ الحالة: قيد المراجعة</strong><br />
-          سيتم معالجة طلبك خلال 24 ساعة بعد التحقق من إثبات الدفع.
-        </div>
-
-        <h3 style="color: #d4af37; margin-top: 25px;">تفاصيل الطلب</h3>
-        <div class="order-details">
-          <div class="detail-row">
-            <span class="label">رقم الطلب:</span>
-            <span class="value">${safeOrder}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">الخطة:</span>
-            <span class="value">${safePlan}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">المبلغ:</span>
-            <span class="value">${Number(amount).toFixed(2)} ${safeSymbol}</span>
-          </div>
-        </div>
-
-        <h3 style="color: #d4af37; margin-top: 25px;">الخطوات التالية</h3>
-        <ol style="color: #555;">
-          <li>سيقوم فريقنا بالتحقق من إثبات الدفع الخاص بك</li>
-          <li>عند الموافقة، ستتلقى بيانات الدخول الخاصة بك عبر البريد الإلكتروني</li>
-          <li>ستتمكن من الوصول الفوري إلى الخدمة بعد تأكيد الطلب</li>
-        </ol>
-
-        <p style="color: #999; font-size: 14px; margin-top: 30px;">
-          إذا كان لديك أي أسئلة، يرجى التواصل معنا عبر صفحة الاتصال بنا.
-        </p>
-      </div>
-
-      <div class="footer">
-        <p>© 2024 A2H Store. جميع الحقوق محفوظة.</p>
-        <p>هذا البريد الإلكتروني تم إرساله تلقائياً. يرجى عدم الرد عليه مباشرة.</p>
-      </div>
-    </div>
-  </body>
-</html>
+// ✅ NEW — Admin Email Template
+function generateAdminNotificationEmail(
+  fullName: string,
+  email: string,
+  orderId: string,
+  planName: string,
+  amount: number,
+  currencySymbol: string
+): string {
+  return `
+  <div style="font-family:Arial; direction:rtl;">
+    <h2>✅ طلب جديد في المتجر</h2>
+    <p><b>رقم الطلب:</b> ${orderId}</p>
+    <p><b>العميل:</b> ${fullName}</p>
+    <p><b>البريد:</b> ${email}</p>
+    <p><b>الخطة/السلة:</b> ${planName}</p>
+    <p><b>المبلغ:</b> ${amount.toFixed(2)} ${currencySymbol}</p>
+    <hr/>
+    <p style="color:#666;font-size:12px;">هذا إشعار تلقائي للمتجر</p>
+  </div>
   `.trim();
 }
 
@@ -166,7 +120,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (!email || !fullName || !orderId || !planName || amount === undefined) {
     return res.status(400).json({
-      error: "Missing required fields: email, fullName, orderId, planName, amount",
+      error: "Missing required fields",
     });
   }
 
@@ -175,14 +129,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Invalid amount" });
   }
 
-  // ✅ Symbol fallback logic
   const safeSymbol =
     (typeof currencySymbol === "string" && currencySymbol.trim()) ||
     (typeof currencyCode === "string" && SYMBOLS[currencyCode]) ||
     "د.ب";
 
   try {
-    const htmlContent = generateOrderConfirmationEmail(
+    // 1️⃣ Send to customer
+    const customerHtml = generateOrderConfirmationEmail(
       String(fullName),
       String(orderId),
       String(planName),
@@ -190,11 +144,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       safeSymbol
     );
 
-    await sendEmail(String(email), `تأكيد طلب الاشتراك - ${orderId}`, htmlContent);
+    await sendEmail(String(email), `تأكيد طلب الاشتراك - ${orderId}`, customerHtml);
+
+    // 2️⃣ Send to store/admin
+    if (STORE_ALERT_EMAIL) {
+      const adminEmails = STORE_ALERT_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
+
+      if (adminEmails.length > 0) {
+        const adminHtml = generateAdminNotificationEmail(
+          String(fullName),
+          String(email),
+          String(orderId),
+          String(planName),
+          amountNum,
+          safeSymbol
+        );
+
+        await sendEmail(adminEmails, `✅ طلب جديد - ${orderId}`, adminHtml);
+      }
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Order confirmation email sent successfully",
+      message: "Emails sent successfully",
     });
   } catch (error: any) {
     console.error("Email sending error:", error);

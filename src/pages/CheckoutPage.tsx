@@ -411,6 +411,19 @@ export default function CheckoutPage() {
                   />
                   {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
                 </div>
+
+                <div className="space-y-2 sm:col-span-2">
+                  <Label htmlFor="email">البريد الإلكتروني (اختياري)</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="إذا كانت خدمتك على بريدك الإلكتروني اكتب بريدك هنا"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
