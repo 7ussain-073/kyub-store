@@ -63,7 +63,7 @@ export default function Header() {
             A
           </div>
           <span className="hidden text-xl font-bold sm:block">
-            <span className="gold-text">A2h</span>{" "}
+            <span className="gold-text">Kyub</span>{" "}
             <span className="text-foreground">Store</span>
           </span>
         </Link>

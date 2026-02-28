@@ -8,10 +8,9 @@ export interface Currency {
 }
 
 const currencies: Currency[] = [
+  { code: "USD", symbol: "$", name: "دولار أمريكي", rate: 0.267 },
   { code: "SAR", symbol: "ر.س", name: "ريال سعودي", rate: 1 },
-  { code: "BHD", symbol: "د.ب", name: "دينار بحريني", rate: 0.1000 },
-  { code: "USD", symbol: "$", name: "دولار أمريكي", rate: 0.2667 },
-  { code: "EUR", symbol: "€", name: "يورو", rate: 0.2450 },
+  { code: "IQD", symbol: "ع.د", name: "دينار عراقي", rate: 351 },
 ];
 
 interface CurrencyContextType {
@@ -26,7 +25,7 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const [currencyCode, setCurrencyCode] = useState(() => {
-    return (localStorage.getItem("currency") as string) || "BHD"; // default main currency = BHD
+    return (localStorage.getItem("currency") as string) || "USD"; // default main currency = USD
   });
 
   const currency = currencies.find(c => c.code === currencyCode) || currencies[0];

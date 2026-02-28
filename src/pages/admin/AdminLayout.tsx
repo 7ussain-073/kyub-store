@@ -54,7 +54,7 @@ export default function AdminLayout() {
             <div className="flex-1">
               <div>
                 <span className="text-sm font-bold text-foreground">لوحة التحكم</span>
-                <p className="text-[10px] text-muted-foreground">A2h Store</p>
+                <p className="text-[10px] text-muted-foreground">Kyub Store</p>
               </div>
 
               <div className="mt-3">
