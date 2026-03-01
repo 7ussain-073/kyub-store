@@ -102,7 +102,7 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     const { data, error } = await supabase
-      .from("benefitpay_orders" as any)
+      .from("orders" as any)
       .select("*")
       .order("created_at", { ascending: false });
 
@@ -134,7 +134,7 @@ export default function AdminOrders() {
 
   const updateOrderStatus = async (orderId: string, newStatus: "approved" | "rejected") => {
     const { error } = await supabase
-      .from("benefitpay_orders" as any)
+      .from("orders" as any)
       .update({ status: newStatus })
       .eq("id", orderId);
 
