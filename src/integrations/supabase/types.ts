@@ -162,7 +162,7 @@ export type Database = {
           plan_id: string
           plan_name: string
           amount: number
-          benefitpay_ref: string | null
+          payment_ref: string | null
           payment_proof_url: string
           status: "pending" | "approved" | "rejected"
           notes: string | null
@@ -177,7 +177,7 @@ export type Database = {
           plan_id: string
           plan_name: string
           amount: number
-          benefitpay_ref?: string | null
+          payment_ref?: string | null
           payment_proof_url: string
           status?: "pending" | "approved" | "rejected"
           notes?: string | null
@@ -192,7 +192,7 @@ export type Database = {
           plan_id?: string
           plan_name?: string
           amount?: number
-          benefitpay_ref?: string | null
+          payment_ref?: string | null
           payment_proof_url?: string
           status?: "pending" | "approved" | "rejected"
           notes?: string | null

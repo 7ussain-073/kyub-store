@@ -201,7 +201,7 @@ CREATE TABLE public.orders (
   plan_id TEXT NOT NULL,
   plan_name TEXT NOT NULL,
   amount NUMERIC(10, 2) NOT NULL,
-  benefitpay_ref TEXT,
+  payment_ref TEXT,
   payment_proof_url TEXT NOT NULL,
   status TEXT DEFAULT 'pending',
     CHECK (status IN ('pending', 'approved', 'rejected')),
@@ -291,7 +291,7 @@ Sent in Arabic with professional styling.
 ## Features & Limitations
 
 ### ✅ Implemented
-- Form validation (all fields required except benefitpay_ref)
+- Form validation (all fields required except payment_ref)
 - Image upload (5MB max, images only)
 - Order creation in database
 - Payment proof storage

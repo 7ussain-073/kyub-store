@@ -48,7 +48,7 @@ interface BenefitPayOrder {
   // ✅ الجديد: تفاصيل السلة (jsonb)
   items?: OrderItemRow[] | any | null;
 
-  benefitpay_ref: string | null;
+  payment_ref: string | null;
   payment_proof_url: string;
   status: OrderStatus;
   notes: string | null;
@@ -260,10 +260,10 @@ export default function AdminOrders() {
                           </p>
                         </div>
 
-                        {order.benefitpay_ref && (
+                        {order.payment_ref && (
                           <div>
                             <p className="text-xs font-medium text-muted-foreground">رقم BenefitPay</p>
-                            <p className="text-sm text-foreground">{order.benefitpay_ref}</p>
+                            <p className="text-sm text-foreground">{order.payment_ref}</p>
                           </div>
                         )}
 
@@ -415,10 +415,10 @@ export default function AdminOrders() {
                   </div>
                 )}
 
-                {selectedOrder.benefitpay_ref && (
+                {selectedOrder.payment_ref && (
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">رقم BenefitPay:</span>
-                    <span className="text-sm font-medium text-foreground">{selectedOrder.benefitpay_ref}</span>
+                    <span className="text-sm font-medium text-foreground">{selectedOrder.payment_ref}</span>
                   </div>
                 )}
               </div>

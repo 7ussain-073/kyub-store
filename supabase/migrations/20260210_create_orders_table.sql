@@ -9,7 +9,7 @@ create table if not exists public.orders (
   plan_id text not null,
   plan_name text not null,
   amount numeric(10, 2) not null,
-  benefitpay_ref text,
+  payment_ref text,
   payment_proof_url text not null,
   status text default 'pending' check (status in ('pending', 'approved', 'rejected')),
   notes text,

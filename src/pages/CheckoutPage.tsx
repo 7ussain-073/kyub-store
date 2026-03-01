@@ -217,7 +217,7 @@ export default function CheckoutPage() {
 
           items: orderItems,
 
-          benefitpay_ref: formData.paymentRef || null, // نخلي الحقل نفسه بس معنى عام
+          payment_ref: formData.paymentRef || null, // نخلي الحقل نفسه بس معنى عام
           payment_proof_url: paymentProofUrl,
           status: "pending",
           notes: null,

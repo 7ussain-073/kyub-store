@@ -172,7 +172,7 @@ CREATE TABLE public.orders (
   plan_id TEXT NOT NULL,
   plan_name TEXT NOT NULL,
   amount NUMERIC(10, 2) NOT NULL,
-  benefitpay_ref TEXT,
+  payment_ref TEXT,
   payment_proof_url TEXT NOT NULL,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
   notes TEXT
