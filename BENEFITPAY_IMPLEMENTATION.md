@@ -2,7 +2,7 @@
 
 ## 📋 Overview
 
-A complete manual BenefitPay payment checkout system has been implemented for A2h Store. Customers can submit orders with payment proof images, and admins can review and approve orders manually.
+A complete manual BenefitPay payment checkout system has been implemented for Kyub Store. Customers can submit orders with payment proof images, and admins can review and approve orders manually.
 
 **Key Features:**
 - ✅ Checkout page with form validation

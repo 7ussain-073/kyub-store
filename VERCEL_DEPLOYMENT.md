@@ -1,6 +1,6 @@
 # Deploying BenefitPay Checkout to Vercel
 
-Complete step-by-step guide for deploying the A2h Store with BenefitPay checkout to Vercel.
+Complete step-by-step guide for deploying the Kyub Store with BenefitPay checkout to Vercel.
 
 ## Prerequisites
 
@@ -122,7 +122,7 @@ Expected response:
 
 1. In Vercel Project Settings → Domains
 2. Click "Add Domain"
-3. Enter your domain (e.g., `a2h-store.com`)
+3. Enter your domain (e.g., `kyubstore.com`)
 4. Update DNS records for your domain:
    ```
    CNAME: www.<yourdomain> → cname.vercel.com

@@ -1,4 +1,4 @@
-import { MessageCircle, Instagram, Youtube, Send, Mail, Phone } from "lucide-react";
+import { MessageCircle, Send, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ContactPage() {
@@ -19,24 +19,24 @@ export default function ContactPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {[
             {
-              icon: Mail,
-              label: "البريد الإلكتروني",
-              value: "a2h.matjar@gmail.com",
-              href: "mailto:a2h.matjar@gmail.com",
+              icon: MessageCircle,
+              label: "واتساب",
+              value: "+964772 8157639",
+              href: "https://wa.me/9647728157639",
               colorClass: "hover:border-primary hover:bg-primary/10",
             },
             {
-              icon: Instagram,
-              label: "انستجرام",
-              value: "@mtjr_a2h",
-              href: "#",
-              colorClass: "hover:border-pink-500 hover:bg-pink-500/10",
+              icon: Mail,
+              label: "البريد الإلكتروني",
+              value: "support@kyubstore.com",
+              href: "mailto:support@kyubstore.com",
+              colorClass: "hover:border-primary hover:bg-primary/10",
             },
             {
               icon: Send,
               label: "تيليجرام",
-              value: "@mtjr_a2h",
-              href: "#",
+              value: "@kyub5",
+              href: "https://t.me/kyub5",
               colorClass: "hover:border-primary hover:bg-primary/10",
             },
           ].map(({ icon: Icon, label, value, href, colorClass }) => (

@@ -1,6 +1,6 @@
 # BenefitPay Checkout System Setup Guide
 
-This guide covers the setup of the manual BenefitPay checkout system for the A2h Store.
+This guide covers the setup of the manual BenefitPay checkout system for the Kyub Store.
 
 ## Database Setup
 

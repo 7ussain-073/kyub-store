@@ -1,12 +1,12 @@
-# BenefitPay Checkout Guide - A2h Store
+# BenefitPay Checkout Guide - Kyub Store
 
-## How to Subscribe to A2h Store Services
+## How to Subscribe to Kyub Store Services
 
 Follow these steps to purchase a subscription using BenefitPay.
 
 ## Step 1: Go to Checkout
 
-1. Visit **A2h Store** website
+1. Visit **Kyub Store** website
 2. Click **اشترك الآن** (Subscribe Now) button
 3. You'll be taken to the checkout page at `/checkout`
 
@@ -146,7 +146,7 @@ If you have issues:
 - Usually respond within 1 hour
 
 ### Email
-- Send to: support@a2h-store.com
+- Send to: support@kyubstore.com
 - Subject: "Order Issue - [Your Order ID]"
 - Response within 24 hours
 

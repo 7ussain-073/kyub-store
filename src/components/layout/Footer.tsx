@@ -81,7 +81,7 @@ export default function Footer() {
             <h3 className="mb-4 text-sm font-semibold text-primary">تابعنا</h3>
             <div className="flex gap-3">
               <a
-                href="https://wa.me/97300000000"
+                href="https://wa.me/9647728157639"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-muted-foreground transition-colors hover:bg-whatsapp hover:text-primary-foreground"
@@ -114,7 +114,7 @@ export default function Footer() {
               </a>
             </div>
             <div className="mt-4 text-sm text-muted-foreground">
-              <p>📧 a2h.matjar@gmail.com</p>
+              <p>📧 support@kyubstore.com</p>
               <p className="mt-1">📱 +973 </p>
             </div>
           </div>

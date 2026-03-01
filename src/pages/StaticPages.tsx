@@ -82,8 +82,8 @@ export function ComplaintsPage() {
       <p>نحرص دائماً على تحسين خدماتنا ونرحب بجميع الشكاوى والمقترحات.</p>
       <h2 className="text-lg font-semibold text-foreground">كيفية تقديم شكوى</h2>
       <ul className="list-disc list-inside space-y-1 pr-4">
-        <li>تواصل معنا عبر واتساب على الرقم: +973 0000 0000</li>
-        <li>أرسل بريد إلكتروني إلى: a2h.matjar@gmail.com</li>
+        <li>تواصل معنا عبر واتساب على الرقم: +964772 8157639</li>
+        <li>أرسل بريد إلكتروني إلى: support@kyubstore.com</li>
         <li>قم بذكر رقم الطلب وتفاصيل المشكلة</li>
       </ul>
       <h2 className="text-lg font-semibold text-foreground">مدة الرد</h2>

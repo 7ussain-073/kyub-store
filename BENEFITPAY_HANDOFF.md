@@ -2,7 +2,7 @@
 
 ## Summary
 
-You now have a complete, production-ready manual BenefitPay checkout system integrated into your A2h Store application.
+You now have a complete, production-ready manual BenefitPay checkout system integrated into your Kyub Store application.
 
 ---
 
