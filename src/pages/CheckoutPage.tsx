@@ -19,9 +19,17 @@ interface CheckoutFormData {
   paymentProofFile: File | null;
 }
 
-type StoreSettingsRow = { account_name: string | null; iban: string | null };
+// new store settings row now holds an account name, a generic payment value
+// (e.g. wallet address / phone / etc) and optional QR image URL.
+// we expect multiple rows so we fetch an array.
 
-// QR optional
+type StoreSettingsRow = {
+  account_name: string | null;
+  payment_method: string | null;
+  qr_image_url: string | null;
+};
+
+// Note: old BenefitPay QR env var is no longer required but keep for backward compatibility
 const BENEFITPAY_QR_URL = import.meta.env.VITE_BENEFITPAY_QR_URL as string | undefined;
 
 export default function CheckoutPage() {
@@ -46,8 +54,8 @@ export default function CheckoutPage() {
   // ✅ لمنع redirect للسلة بعد نجاح الطلب
   const [checkoutCompleted, setCheckoutCompleted] = useState(false);
 
-  // IBAN
-  const [paymentInfo, setPaymentInfo] = useState<{ accountName: string; iban: string }>({ accountName: "", iban: "" });
+  // payment methods fetched from store_settings
+  const [paymentMethods, setPaymentMethods] = useState<StoreSettingsRow[]>([]);
   const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
 
   // إجمالي السلة بالـ SAR (حسب CartContext)
@@ -80,7 +88,7 @@ export default function CheckoutPage() {
     }
   }, [items.length, checkoutCompleted, isSubmitting, navigate, toast]);
 
-  // Fetch store settings (IBAN)
+  // Fetch store settings rows - all payment options
   useEffect(() => {
     let cancelled = false;
 
@@ -89,20 +97,22 @@ export default function CheckoutPage() {
 
       const res = await supabase
         .from("store_settings" as any)
-        .select("account_name, iban")
-        .eq("id", 1)
-        .single();
+        .select("account_name, payment_method, qr_image_url");
 
       if (cancelled) return;
 
-      if (!res.error && res.data) {
-        const row = res.data as unknown as StoreSettingsRow;
-        setPaymentInfo({
-          accountName: row?.account_name ?? "",
-          iban: row?.iban ?? "",
-        });
+      if (!res.error && Array.isArray(res.data)) {
+        const validMethods = (res.data as unknown[]).filter(
+          (item): item is StoreSettingsRow =>
+            typeof item === 'object' &&
+            item !== null &&
+            'account_name' in item &&
+            'payment_method' in item &&
+            'qr_image_url' in item
+        );
+        setPaymentMethods(validMethods);
       } else {
-        setPaymentInfo({ accountName: "", iban: "" });
+        setPaymentMethods([]);
       }
 
       setLoadingPaymentInfo(false);
@@ -263,7 +273,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen py-6 md:py-12">
       <div className="container max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">الدفع عبر BenefitPay</h1>
+          <h1 className="text-3xl font-bold text-foreground">الدفع</h1>
           <p className="mt-2 text-muted-foreground">راجع سلتك ثم ارفع إثبات الدفع</p>
 
           <div className="mt-3">
@@ -275,57 +285,60 @@ export default function CheckoutPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* IBAN */}
+          {/* Payment methods (store_settings) */}
           <Card>
             <CardHeader>
-              <CardTitle>بيانات التحويل</CardTitle>
-              <CardDescription>حوّل المبلغ ثم ارفع إثبات الدفع</CardDescription>
+              <CardTitle>بيانات الدفع</CardTitle>
+              <CardDescription>استخدم أي من الطرق التالية ثم ارفع إثبات الدفع</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
               {loadingPaymentInfo ? (
-                <p className="text-sm text-muted-foreground">جاري تحميل بيانات التحويل...</p>
-              ) : !paymentInfo.iban ? (
+                <p className="text-sm text-muted-foreground">جاري تحميل بيانات طرق الدفع...</p>
+              ) : paymentMethods.length === 0 ? (
                 <p className="text-sm text-destructive">
-                  لم يتم إعداد IBAN بعد. أضف IBAN في Supabase داخل جدول store_settings (id=1).
+                  لم يتم إعداد أي طريقة دفع بعد. أضف صفوفاً في جدول store_settings عبر Supabase.
                 </p>
               ) : (
-                <>
-                  {paymentInfo.accountName && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">اسم الحساب: </span>
-                      <span className="font-medium text-foreground">{paymentInfo.accountName}</span>
+                paymentMethods.map((row, idx) => {
+                  const method = row.payment_method || "";
+                  const account = row.account_name || "";
+                  const qr = row.qr_image_url || "";
+
+                  return (
+                    <div key={idx} className="space-y-2">
+                      {account && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">{account}:</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/40 p-3">
+                        <div className="min-w-0">
+                          <p className="text-xs text-muted-foreground">{account || "تفاصيل الدفع"}</p>
+                          <p className="font-mono text-sm text-foreground break-all">{method}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => copyText(method, "معلومات الدفع")}
+                          className="shrink-0 flex items-center gap-2"
+                        >
+                          <Copy className="h-4 w-4" />
+                          نسخ
+                        </Button>
+                      </div>
+                      {qr && (
+                        <div className="space-y-2">
+                          <img
+                            src={qr}
+                            alt="QR code"
+                            className="max-w-[220px] rounded-lg border border-border bg-secondary p-2"
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/40 p-3">
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">IBAN</p>
-                      <p className="font-mono text-sm text-foreground break-all">{paymentInfo.iban}</p>
-                    </div>
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => copyText(paymentInfo.iban, "رقم الآيبان")}
-                      className="shrink-0 flex items-center gap-2"
-                    >
-                      <Copy className="h-4 w-4" />
-                      نسخ
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {BENEFITPAY_QR_URL && (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-foreground">QR Code</p>
-                  <img
-                    src={BENEFITPAY_QR_URL}
-                    alt="BenefitPay QR"
-                    className="max-w-[220px] rounded-lg border border-border bg-secondary p-2"
-                  />
-                </div>
+                  );
+                })
               )}
             </CardContent>
           </Card>
