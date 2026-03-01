@@ -15,22 +15,19 @@ interface CheckoutFormData {
   fullName: string;
   phone: string;
   email: string;
-  benefitpayRef: string;
+  // صار عام بدل benefitpay
+  paymentRef: string;
   paymentProofFile: File | null;
 }
 
-// new store settings row now holds an account name, a generic payment value
-// (e.g. wallet address / phone / etc) and optional QR image URL.
-// we expect multiple rows so we fetch an array.
-
+// ✅ مطابق لجدول store_settings بالصورة
 type StoreSettingsRow = {
-  account_name: string | null;
-  payment_method: string | null;
-  qr_image_url: string | null;
+  id: number;
+  account_name: string | null;      // مثال: ethereum / USDT (trc20) / liteCoin / Asia Cell
+  payment_method: string | null;    // العنوان/الرقم
+  qr_image_url: string | null;      // رابط QR (اختياري)
+  updated_at?: string | null;
 };
-
-// Note: old BenefitPay QR env var is no longer required but keep for backward compatibility
-const BENEFITPAY_QR_URL = import.meta.env.VITE_BENEFITPAY_QR_URL as string | undefined;
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -43,7 +40,7 @@ export default function CheckoutPage() {
     fullName: "",
     phone: "",
     email: "",
-    benefitpayRef: "",
+    paymentRef: "",
     paymentProofFile: null,
   });
 
@@ -54,9 +51,9 @@ export default function CheckoutPage() {
   // ✅ لمنع redirect للسلة بعد نجاح الطلب
   const [checkoutCompleted, setCheckoutCompleted] = useState(false);
 
-  // payment methods fetched from store_settings
+  // ✅ طرق الدفع من store_settings
   const [paymentMethods, setPaymentMethods] = useState<StoreSettingsRow[]>([]);
-  const [loadingPaymentInfo, setLoadingPaymentInfo] = useState(true);
+  const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(true);
 
   // إجمالي السلة بالـ SAR (حسب CartContext)
   const totalSar = useMemo(() => Number(totalPrice) || 0, [totalPrice]);
@@ -88,34 +85,27 @@ export default function CheckoutPage() {
     }
   }, [items.length, checkoutCompleted, isSubmitting, navigate, toast]);
 
-  // Fetch store settings rows - all payment options
+  // ✅ Fetch store_settings (كل طرق الدفع)
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      setLoadingPaymentInfo(true);
+      setLoadingPaymentMethods(true);
 
       const res = await supabase
         .from("store_settings" as any)
-        .select("account_name, payment_method, qr_image_url");
+        .select("id, account_name, payment_method, qr_image_url, updated_at")
+        .order("id", { ascending: true });
 
       if (cancelled) return;
 
       if (!res.error && Array.isArray(res.data)) {
-        const validMethods = (res.data as unknown[]).filter(
-          (item): item is StoreSettingsRow =>
-            typeof item === 'object' &&
-            item !== null &&
-            'account_name' in item &&
-            'payment_method' in item &&
-            'qr_image_url' in item
-        );
-        setPaymentMethods(validMethods);
+        setPaymentMethods(res.data as unknown as StoreSettingsRow[]);
       } else {
         setPaymentMethods([]);
       }
 
-      setLoadingPaymentInfo(false);
+      setLoadingPaymentMethods(false);
     })();
 
     return () => {
@@ -204,13 +194,11 @@ export default function CheckoutPage() {
 
       // ✅ plan_id لازم يكون NOT NULL (سريع: نخليها أول منتج بالسلة)
       const firstProductId = items[0]?.product?.id;
-      if (!firstProductId) {
-        throw new Error("السلة فارغة");
-      }
+      if (!firstProductId) throw new Error("السلة فارغة");
 
       const planName = `سلة مشتريات (${items.length} منتجات)`;
 
-      // Insert order
+      // Insert order (مثل ما هو عندك)
       const { error: orderError } = await supabase
         .from("benefitpay_orders" as any)
         .insert({
@@ -219,7 +207,7 @@ export default function CheckoutPage() {
           phone: formData.phone,
           email: formData.email,
 
-          plan_id: firstProductId, // ✅ أهم تعديل (بدون null)
+          plan_id: firstProductId,
           plan_name: planName,
 
           amount,
@@ -229,7 +217,7 @@ export default function CheckoutPage() {
 
           items: orderItems,
 
-          benefitpay_ref: formData.benefitpayRef || null,
+          benefitpay_ref: formData.paymentRef || null, // نخلي الحقل نفسه بس معنى عام
           payment_proof_url: paymentProofUrl,
           status: "pending",
           notes: null,
@@ -256,7 +244,6 @@ export default function CheckoutPage() {
 
       toast({ title: "تم استقبال طلبك بنجاح", description: "سيتم التحقق من الدفع وإرسال التفاصيل قريباً" });
 
-      // ✅ امنع redirect للسلة بعد clearCart
       setCheckoutCompleted(true);
       clearCart();
 
@@ -285,60 +272,66 @@ export default function CheckoutPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Payment methods (store_settings) */}
+          {/* ✅ Payment Methods from store_settings */}
           <Card>
             <CardHeader>
-              <CardTitle>بيانات الدفع</CardTitle>
-              <CardDescription>استخدم أي من الطرق التالية ثم ارفع إثبات الدفع</CardDescription>
+              <CardTitle>طرق الدفع</CardTitle>
+              <CardDescription>اختر الطريقة المناسبة و انسخ البيانات، ثم ارفع إثبات الدفع</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
-              {loadingPaymentInfo ? (
-                <p className="text-sm text-muted-foreground">جاري تحميل بيانات طرق الدفع...</p>
+              {loadingPaymentMethods ? (
+                <p className="text-sm text-muted-foreground">جاري تحميل طرق الدفع...</p>
               ) : paymentMethods.length === 0 ? (
                 <p className="text-sm text-destructive">
-                  لم يتم إعداد أي طريقة دفع بعد. أضف صفوفاً في جدول store_settings عبر Supabase.
+                  لم يتم إعداد طرق الدفع بعد. أضف صفوف داخل Supabase في جدول store_settings.
                 </p>
               ) : (
-                paymentMethods.map((row, idx) => {
-                  const method = row.payment_method || "";
-                  const account = row.account_name || "";
-                  const qr = row.qr_image_url || "";
+                <div className="space-y-3">
+                  {paymentMethods.map((row) => {
+                    const title = row.account_name?.trim() || `Method #${row.id}`;
+                    const value = row.payment_method?.trim() || "";
+                    const qr = row.qr_image_url?.trim() || "";
 
-                  return (
-                    <div key={idx} className="space-y-2">
-                      {account && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">{account}:</span>
+                    return (
+                      <div key={row.id} className="rounded-lg border border-border bg-secondary/30 p-3 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground">{title}</p>
+                            <p className="text-xs text-muted-foreground">انسخ العنوان/الرقم</p>
+                          </div>
+
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => value && copyText(value, title)}
+                            className="shrink-0 flex items-center gap-2"
+                            disabled={!value}
+                          >
+                            <Copy className="h-4 w-4" />
+                            نسخ
+                          </Button>
                         </div>
-                      )}
-                      <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-secondary/40 p-3">
-                        <div className="min-w-0">
-                          <p className="text-xs text-muted-foreground">{account || "تفاصيل الدفع"}</p>
-                          <p className="font-mono text-sm text-foreground break-all">{method}</p>
+
+                        <div className="rounded-lg border border-border bg-card p-3">
+                          <p className="text-xs text-muted-foreground">القيمة</p>
+                          <p className="font-mono text-sm text-foreground break-all">{value || "—"}</p>
                         </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => copyText(method, "معلومات الدفع")}
-                          className="shrink-0 flex items-center gap-2"
-                        >
-                          <Copy className="h-4 w-4" />
-                          نسخ
-                        </Button>
+
+                        {qr && (
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-foreground">QR Code</p>
+                            <img
+                              src={qr}
+                              alt={`${title} QR`}
+                              className="max-w-[220px] rounded-lg border border-border bg-secondary p-2"
+                            />
+                          </div>
+                        )}
                       </div>
-                      {qr && (
-                        <div className="space-y-2">
-                          <img
-                            src={qr}
-                            alt="QR code"
-                            className="max-w-[220px] rounded-lg border border-border bg-secondary p-2"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
+                    );
+                  })}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -426,34 +419,32 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="email">البريد الإلكتروني (اختياري)</Label>
+                  <Label htmlFor="serviceEmail">البريد الإلكتروني للخدمة (اختياري)</Label>
                   <Input
-                    id="email"
+                    id="serviceEmail"
                     type="email"
                     placeholder="إذا كانت خدمتك على بريدك الإلكتروني اكتب بريدك هنا"
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, email: e.target.value }))
-                    }
+                    onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* BenefitPay Ref */}
+          {/* Payment Ref (optional) */}
           <Card>
             <CardHeader>
               <CardTitle>معلومات الدفع</CardTitle>
-              <CardDescription>رقم الإحالة (اختياري)</CardDescription>
+              <CardDescription>رقم العملية/Tx (اختياري)</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Label htmlFor="benefitPayRef">رقم إحالة BenefitPay (اختياري)</Label>
+                <Label htmlFor="paymentRef">رقم العملية / TxID (اختياري)</Label>
                 <Input
-                  id="benefitPayRef"
-                  value={formData.benefitpayRef}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, benefitpayRef: e.target.value }))}
+                  id="paymentRef"
+                  value={formData.paymentRef}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, paymentRef: e.target.value }))}
                 />
               </div>
             </CardContent>
@@ -463,7 +454,7 @@ export default function CheckoutPage() {
           <Card>
             <CardHeader>
               <CardTitle>إثبات الدفع</CardTitle>
-              <CardDescription>حمّل صورة من إثبات الدفع من BenefitPay</CardDescription>
+              <CardDescription>حمّل صورة من إثبات التحويل</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
