@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext"; // need auth state for permission checks
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -73,6 +74,9 @@ export default function AdminOrders() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
+  // authentication context (used to know when we can query orders)
+  const { user, isAdmin, loading: authLoading } = useAuth();
+
   // ✅ helper: items ممكن تجي array أو string أو null حسب DB/SDK
   const safeItems = (order?: BenefitPayOrder | null): OrderItemRow[] => {
     if (!order) return [];
@@ -110,7 +114,7 @@ export default function AdminOrders() {
       console.error("Error fetching orders:", error);
       toast({
         title: "خطأ",
-        description: "فشل تحميل الطلبات",
+        description: error.message || error.details || "فشل تحميل الطلبات",
         variant: "destructive",
       });
       setLoading(false);
@@ -129,8 +133,12 @@ export default function AdminOrders() {
   };
 
   useEffect(() => {
+    // avoid running before auth finishes; RLS may block if user not known
+    if (authLoading) return;
+    if (!isAdmin) return; // should already be gated by layout, but guard anyway
+
     fetchOrders();
-  }, []);
+  }, [authLoading, isAdmin]);
 
   const updateOrderStatus = async (orderId: string, newStatus: "approved" | "rejected") => {
     const { error } = await supabase

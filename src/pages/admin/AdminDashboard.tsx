@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Package, ShoppingCart, Users, TrendingUp, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCurrency } from "@/contexts/CurrencyContext";
@@ -19,8 +20,12 @@ export default function AdminDashboard() {
     totalRevenue: 0,
   });
   const { formatPrice } = useCurrency();
+  const { isAdmin, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAdmin) return;
+
     const fetchStats = async () => {
       const [orders, pending, products] = await Promise.all([
         supabase.from("orders").select("id, amount", { count: "exact" }),
@@ -38,7 +43,7 @@ export default function AdminDashboard() {
       });
     };
     fetchStats();
-  }, []);
+  }, [authLoading, isAdmin]);
 
   const cards = [
     { icon: ShoppingCart, label: "إجمالي الطلبات", value: stats.totalOrders, color: "text-primary" },
