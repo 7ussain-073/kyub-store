@@ -23,12 +23,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       const [orders, pending, products] = await Promise.all([
-        supabase.from("orders").select("id, total", { count: "exact" }),
+        supabase.from("orders").select("id, amount", { count: "exact" }),
         supabase.from("orders").select("id", { count: "exact" }).eq("status", "pending"),
         supabase.from("products").select("id", { count: "exact" }),
       ]);
 
-      const revenue = (orders.data || []).reduce((sum, o) => sum + Number(o.total || 0), 0);
+      const revenue = (orders.data || []).reduce((sum, o) => sum + Number(o.amount || 0), 0);
 
       setStats({
         totalOrders: orders.count || 0,

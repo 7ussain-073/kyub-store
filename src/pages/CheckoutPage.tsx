@@ -196,7 +196,7 @@ export default function CheckoutPage() {
       const firstProductId = items[0]?.product?.id;
       if (!firstProductId) throw new Error("السلة فارغة");
 
-      const planName = `سلة مشتريات (${items.length} منتجات)`;
+      const planName = items.map(i => i.product.name).join(" + ");
 
       // Insert order (مثل ما هو عندك)
       const { error: orderError } = await supabase
