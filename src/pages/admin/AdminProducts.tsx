@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Edit, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCurrency } from "@/contexts/CurrencyContext";
 
 interface DBVariant {
   id: string;
@@ -44,6 +45,7 @@ export default function AdminProducts() {
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const { toast } = useToast();
+  const { currency, convert } = useCurrency();
 
   function showSbError(toastFn: any, title: string, error: any) {
     console.error(title, error);
@@ -152,13 +154,20 @@ export default function AdminProducts() {
         for (const vf of variantForms) {
           if (!vf.duration || !vf.price) continue;
 
-          const variantPayload = {
-            product_id: productId,
-            duration: vf.duration,
-            price: Number(vf.price),
-            sale_price: vf.sale_price ? Number(vf.sale_price) : null,
-            stock_status: vf.stock_status,
-          };
+            // prices entered in the admin UI are in the currently selected currency
+            // convert them back to SAR for storage (system expects SAR)
+            const enteredPrice = Number(vf.price);
+            const enteredSale = vf.sale_price ? Number(vf.sale_price) : null;
+            const priceInSar = Math.round(((enteredPrice / (currency.rate || 1)) + Number.EPSILON) * 100) / 100;
+            const saleInSar = enteredSale != null ? Math.round(((enteredSale / (currency.rate || 1)) + Number.EPSILON) * 100) / 100 : null;
+
+            const variantPayload = {
+              product_id: productId,
+              duration: vf.duration,
+              price: priceInSar,
+              sale_price: saleInSar,
+              stock_status: vf.stock_status,
+            };
 
           if (vf.id) {
             const { error: upErr } = await supabase.from("product_variants").update(variantPayload).eq("id", vf.id);
@@ -204,13 +213,14 @@ export default function AdminProducts() {
       category_id: p.category_id || "",
     });
 
+    // convert stored SAR prices to current selected currency for editing
     setVariantForms(
       p.product_variants.length > 0
         ? p.product_variants.map((v) => ({
             id: v.id,
             duration: v.duration,
-            price: String(v.price),
-            sale_price: v.sale_price ? String(v.sale_price) : "",
+            price: String(convert(Number(v.price || 0))),
+            sale_price: v.sale_price ? String(convert(Number(v.sale_price))) : "",
             stock_status: v.stock_status,
           }))
         : [{ ...emptyVariant }]
@@ -347,7 +357,7 @@ export default function AdminProducts() {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">السعر (ر.س)</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">السعر ({currency.code})</label>
                   <input
                     type="number"
                     step="0.01"
