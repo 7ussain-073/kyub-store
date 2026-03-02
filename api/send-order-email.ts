@@ -25,7 +25,7 @@ async function sendEmailViaResend(to: string | string[], subject: string, html: 
       Authorization: `Bearer ${resendApiKey}`,
     },
     body: JSON.stringify({
-      from: "Kyub Store <noreply@kyubstore.com>",
+      from: "Kyub Store <noreply@kayube.com>",
       to,
       subject,
       html,
@@ -54,7 +54,7 @@ async function sendEmailViaSendGrid(to: string | string[], subject: string, html
     },
     body: JSON.stringify({
       personalizations: [{ to: toArr.map((email) => ({ email })), subject }],
-      from: { email: "noreply@kyubstore.com", name: "Kyub Store" },
+      from: { email: "noreply@kayube.com", name: "Kyub Store" },
       content: [{ type: "text/html", value: html }],
     }),
   });
@@ -245,7 +245,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const safeSymbol =
     (typeof currencySymbol === "string" && currencySymbol.trim()) ||
     (typeof currencyCode === "string" && SYMBOLS[currencyCode]) ||
-    "د.ب";
+    "$";
 
   try {
     // 1) Email to customer (DESIGN محفوظ)
