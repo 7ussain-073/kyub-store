@@ -49,7 +49,7 @@ export default function AdminLayout() {
         <div className="p-4">
           <div className="flex items-center gap-2 mb-6">
             <div className="gold-gradient flex h-9 w-9 items-center justify-center rounded-lg text-lg font-bold text-primary-foreground">
-              A
+              K
             </div>
             <div className="flex-1">
               <div>

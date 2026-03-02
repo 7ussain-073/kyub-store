@@ -53,7 +53,7 @@ export default function OrderTracking() {
                 type="text"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
-                placeholder="05XXXXXXXX أو email@example.com"
+                placeholder="+964772 8157639 أو kyub.comnpany.0@gmail.com"
                 className="w-full rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 required
               />

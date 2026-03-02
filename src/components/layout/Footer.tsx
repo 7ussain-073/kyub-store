@@ -114,8 +114,8 @@ export default function Footer() {
               </a>
             </div>
             <div className="mt-4 text-sm text-muted-foreground">
-              <p>📧 support@kyubstore.com</p>
-              <p className="mt-1">📱 +973 </p>
+              <p>📧 kyub.comnpany.0@gmail.com</p>
+              <p className="mt-1">📱 +964772 8157639</p>
             </div>
           </div>
         </div>
