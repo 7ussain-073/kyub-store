@@ -28,8 +28,8 @@ export default function ContactPage() {
             {
               icon: Mail,
               label: "البريد الإلكتروني",
-              value: "support@kyubstore.com",
-              href: "mailto:support@kyubstore.com",
+              value: "support@collierstore.com",
+              href: "mailto:support@collierstore.com",
               colorClass: "hover:border-primary hover:bg-primary/10",
             },
             {

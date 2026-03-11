@@ -28,7 +28,7 @@ function StaticPage({ title, children }: { title: string; children: React.ReactN
 export function PrivacyPage() {
   return (
     <StaticPage title="سياسة الخصوصية">
-      <p>نحن في متجر Kyub نولي أهمية كبيرة لخصوصية عملائنا. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك الشخصية.</p>
+      <p>نحن في متجر Collier نولي أهمية كبيرة لخصوصية عملائنا. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك الشخصية.</p>
       <h2 className="text-lg font-semibold text-foreground">المعلومات التي نجمعها</h2>
       <p>نجمع المعلومات التالية عند استخدامك لمتجرنا:</p>
       <ul className="list-disc list-inside space-y-1 pr-4">
@@ -48,7 +48,7 @@ export function PrivacyPage() {
 export function TermsPage() {
   return (
     <StaticPage title="الشروط والأحكام">
-      <p>مرحباً بك في متجر Kyub. باستخدامك لهذا الموقع فإنك توافق على الشروط والأحكام التالية:</p>
+      <p>مرحباً بك في متجر Collier. باستخدامك لهذا الموقع فإنك توافق على الشروط والأحكام التالية:</p>
       <h2 className="text-lg font-semibold text-foreground">طبيعة المنتجات</h2>
       <p>جميع المنتجات المعروضة هي اشتراكات رقمية. لا يتم شحن أي منتجات مادية. يتم التسليم عبر إرسال بيانات التفعيل بعد إتمام عملية الدفع.</p>
       <h2 className="text-lg font-semibold text-foreground">الدفع</h2>

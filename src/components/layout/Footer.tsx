@@ -13,12 +13,12 @@ export default function Footer() {
                 A
               </div>
               <span className="text-lg font-bold">
-                <span className="gold-text">Kyub</span>{" "}
+                <span className="gold-text">Collier</span>{" "}
                 <span className="text-foreground">Store</span>
               </span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              متجر Kyub الرقمي - وجهتك الأولى لاشتراكات البث والخدمات الرقمية بأفضل الأسعار مع ضمان كامل المدة.
+              متجر Collier الرقمي - وجهتك الأولى لاشتراكات البث والخدمات الرقمية بأفضل الأسعار مع ضمان كامل المدة.
             </p>
           </div>
 
@@ -121,7 +121,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t border-border pt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Kyub Store. جميع الحقوق محفوظة.
+          © {new Date().getFullYear()} Collier Store. جميع الحقوق محفوظة.
         </div>
       </div>
     </footer>

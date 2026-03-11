@@ -25,7 +25,7 @@ async function sendEmailViaResend(to: string | string[], subject: string, html: 
       Authorization: `Bearer ${resendApiKey}`,
     },
     body: JSON.stringify({
-      from: "Kyub Store <noreply@kayube.com>",
+      from: "Collier Store <noreply@kayube.com>",
       to,
       subject,
       html,
@@ -54,7 +54,7 @@ async function sendEmailViaSendGrid(to: string | string[], subject: string, html
     },
     body: JSON.stringify({
       personalizations: [{ to: toArr.map((email) => ({ email })), subject }],
-      from: { email: "noreply@kayube.com", name: "Kyub Store" },
+      from: { email: "noreply@kayube.com", name: "Collier Store" },
       content: [{ type: "text/html", value: html }],
     }),
   });
@@ -110,11 +110,11 @@ function generateOrderConfirmationEmail(
   </head>
   <body>
     <div class="container">
-      <div class="header"><h1>Kyub Store</h1></div>
+      <div class="header"><h1>Collier Store</h1></div>
 
       <div class="content">
         <p>مرحباً ${safeName},</p>
-        <p>شكراً لك على اختيار خدمات Kyub Store!</p>
+        <p>شكراً لك على اختيار خدمات Collier Store!</p>
         <p>لقد استقبلنا طلبك بنجاح. سيتم التحقق من إثبات الدفع الخاص بك وتأكيد اشتراكك قريباً.</p>
 
         <div class="status-pending">
@@ -151,7 +151,7 @@ function generateOrderConfirmationEmail(
       </div>
 
       <div class="footer">
-        <p>© 2024 Kyub Store. جميع الحقوق محفوظة.</p>
+        <p>© 2024 Collier Store. جميع الحقوق محفوظة.</p>
         <p>هذا البريد الإلكتروني تم إرساله تلقائياً. يرجى عدم الرد عليه مباشرة.</p>
       </div>
     </div>

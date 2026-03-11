@@ -55,7 +55,7 @@ After approval, you must manually deliver the subscription:
    - Any additional instructions
 
 2. Send delivery email with:
-   - Subject: "تم تفعيل اشتراكك - Kyub Store"
+   - Subject: "تم تفعيل اشتراكك - Collier"
    - Include: username, password/link, login URL
    - Include: Subscription end date
 
